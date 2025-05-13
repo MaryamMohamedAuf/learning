@@ -8,13 +8,9 @@ class TestController extends Controller
 {
     public function __invoke(Request $request)
     {
-       // sleep(5);
-       // abort(500);
-       // return response()->json(['message' => 'It works!']);
-
-        return response()->json([
-          //  "responseObject" => 'done',
-            "responseObject" => 'doneت'
-        ],200);
+        
+       return response()->json([
+            "responseObject" => 'it works',
+        ]);
     }
 }
