@@ -13,11 +13,6 @@ class TaskManager extends Component
 //2-way binding means the data in the backend (PHP) and the data in the frontend (HTML/JS) are always kept in sync automatically.
     #[Validate('required|min:3')]
     public string $title = '';
-//Livewire calls Laravel's built-in Validator::make() using the $rules property.
-
-//    protected $rules = [
-//        'title' => 'required|string|min:3',
-//    ];
 
     public function addTask()
     {
