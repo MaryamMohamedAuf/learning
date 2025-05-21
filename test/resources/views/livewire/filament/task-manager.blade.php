@@ -1,9 +1,15 @@
 <div class="space-y-6">
-    <form wire:submit.prevent="addTask" class="flex items-center gap-4">
+    @if(session('status'))
+        <span>
+       {{session('status')}}
+  </span>
+    @endif
+    <form wire:submit.prevent="addTask" class="flex items-center gap-4 bg-gray-50">
 {{--  Prevent the default form submission (i.e., no full page reload).--}}
 {{--  .lazy: Only updates the backend after input loses focus (on blur) to reduce requests.--}}
         <x-filament::input wire:model.lazy="title" placeholder="Enter a task..." class="w-full" />
-{{--   Type submit means it triggers the form’s wire:submit.--}}
+ <x-filament::input wire:model.lazy="image" type="file"" />
+        {{--   Type submit means it triggers the form’s wire:submit.--}}
         <x-filament::button type="submit">Add</x-filament::button>
     </form>
 
@@ -28,4 +34,8 @@
             </li>
         @endforeach
     </ul>
+        <div class="mt-4 p-6">
+            {{ $tasks->links() }}
+        </div>
 </div>
+
