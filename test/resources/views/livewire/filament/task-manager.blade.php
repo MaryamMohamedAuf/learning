@@ -8,7 +8,7 @@
 {{--  Prevent the default form submission (i.e., no full page reload).--}}
 {{--  .lazy: Only updates the backend after input loses focus (on blur) to reduce requests.--}}
         <x-filament::input wire:model.lazy="title" placeholder="Enter a task..." class="w-full" />
- <x-filament::input wire:model.lazy="image" type="file"" />
+ <x-filament::input wire:model.lazy="image" type="file" />
         {{--   Type submit means it triggers the form’s wire:submit.--}}
         <x-filament::button type="submit">Add</x-filament::button>
     </form>
@@ -33,6 +33,7 @@
                 </div>
             </li>
         @endforeach
+        <div wire:loading> sending.... </div>
     </ul>
         <div class="mt-4 p-6">
             {{ $tasks->links() }}
