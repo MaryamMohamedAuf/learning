@@ -16,19 +16,19 @@ class TaskManager extends Component
 //2-way binding means the data in the backend (PHP) and the data in the frontend (HTML/JS) are always kept in sync automatically.
     #[Validate('required|min:3')]
     public string $title = '';
-public $image = null;
+public $image = [];
     public function addTask()
     {
         $this->validate();
-if($this->image != null){
-    $this->image->store('images', 'local');
+foreach ($this->image as $image){
+   $image->store('images', 'local');
 }
         Task::create([
             'title' => $this->title,
         ]);
 //Resets the input box (2-way bound via wire:model).
         $this->title = '';
-        $this->image = null;
+        $this->image = [];
 request()->session()->flash('status', 'done');
 
         Notification::make()
