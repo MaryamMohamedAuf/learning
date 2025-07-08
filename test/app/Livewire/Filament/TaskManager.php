@@ -32,6 +32,10 @@ class TaskManager extends Component
 
     public function toggleTask(Task $task)
     {
+        //toggle operation.
+        //The ! operator negates the current value.
+        //If $task->is_done is true, this sets it to false.
+        //If it's false, it sets it to true.
         $task->is_done = !$task->is_done;
         $task->save();
     }
