@@ -41,24 +41,16 @@ class TestController extends Controller
         Log::info('📋 Form field values:', $request->except(['VoucherImage'])); // filtering
 
         // Logs file field keys only
-        Log::info('📂 Uploaded files:', array_keys($request->allFiles()));
-       // dd($request->all());
-        Log::info('🔥 Incoming form request received');
+
         Log::info('Form fields:', $request->allFiles());
 
-        if ($request->hasFile('VoucherImage')) {
-            Log::info('✅ Image received');
-            Log::info($request->file('VoucherImage')->getClientOriginalName());
-        }
 
-//        return response()->json([
-//            'message' => '✅ Request processed'
-//        ]);
         return response()->json([
             'message' => 'Form data received successfully ✅',
             'data' => [
-                'voucher_image' => $request->input('voucher_image'),
-                'user_id' => $request->input('user_id'),
+                'customer_id' => $request->input('customer_id'),
+                'user_id' => $request->input('pin_code'),
+                'file' => $request->file('file')
             ],
         ]);
     }
