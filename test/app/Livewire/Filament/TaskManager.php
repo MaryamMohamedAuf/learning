@@ -5,24 +5,31 @@ use App\Models\Task;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Filament\Notifications\Notification;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class TaskManager extends Component
 {
+    use WithPagination, WithFileUploads;
     //$title is two-way bound (wire:model) to the input field in your Blade file.
     //When the input changes in the browser, Livewire syncs the change to this variable using AlpineJS + AJAX.
 //2-way binding means the data in the backend (PHP) and the data in the frontend (HTML/JS) are always kept in sync automatically.
     #[Validate('required|min:3')]
     public string $title = '';
-
+public $image = [];
     public function addTask()
     {
         $this->validate();
-
+foreach ($this->image as $image){
+   $image->store('images', 'local');
+}
         Task::create([
             'title' => $this->title,
         ]);
 //Resets the input box (2-way bound via wire:model).
         $this->title = '';
+        $this->image = [];
+request()->session()->flash('status', 'done');
 
         Notification::make()
             ->title('Task added!')
@@ -55,7 +62,7 @@ class TaskManager extends Component
     public function render()
     {
         return view('livewire.filament.task-manager', [
-            'tasks' => Task::latest()->get(),
+            'tasks' => Task::latest()->paginate(2),
         ]);
     }
 }
