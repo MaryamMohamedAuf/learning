@@ -49,8 +49,8 @@ class TestController extends Controller
             'message' => 'Form data received successfully ✅',
             'data' => [
                 'customer_id' => $request->input('customer_id'),
-                'user_id' => $request->input('pin_code'),
-                'file' => $request->file('file')
+                'pin_code' => $request->input('pin_code'),
+              //  'file' => $request->file('file')
             ],
         ]);
     }
