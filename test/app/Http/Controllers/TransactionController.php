@@ -16,6 +16,6 @@ class TransactionController extends Controller
         return response()->json([
             "message" => "Order not found ",
             "status" => 400
-        ], 400);
+        ], 200);
     }
-} 
+}
