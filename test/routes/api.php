@@ -7,7 +7,3 @@ use Illuminate\Support\Facades\Route;
 
 Route::POST('/return', TestController::class);
 
-// Waffarha API Mock Routes
-Route::post('/transaction', [TransactionController::class, 'index']);
-Route::post('/verify-otp', [VerifyOtpController::class, 'index']);
-Route::post('/order-summary', [OrderSummaryController::class, 'index']);
