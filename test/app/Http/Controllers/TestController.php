@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -10,25 +9,23 @@ class TestController extends Controller
 {
     public function __invoke(Request $request)
     {
-
-        // ✅ Log full incoming request (form fields + files separately)
-        Log::info('🔥 Incoming form request received');
-
-        // Logs all form fields (text fields, not files)
-        Log::info('📋 Form field values:', $request->except(['VoucherImage'])); // filtering
-
-        // Logs file field keys only
-
-        Log::info('Form fields:', $request->allFiles());
-
+        // Log incoming request
+        Log::info('🔥 Incoming request received');
 
         return response()->json([
-            'message' => 'Form data received successfully ✅',
-            'data' => [
-                'customer_id' => $request->input('customer_id'),
-                'pin_code' => $request->input('pin_code'),
-              //  'file' => $request->file('file')
+            'meta' => [
+                'code' => 200,
+                'errors' => [],
             ],
+            'data1' => $request->all(),
+            'data' => [
+                'body' => $request->all(),          // all body params
+                'query' => $request->query(),        // URL parameters
+                'headers' => $request->headers->all(), // request headers
+                'bearer_token' => $request->bearerToken(),  // Authorization Bearer
+                'files' => $request->allFiles(),     // uploaded files
+            ],
+            'pagination' => new \stdClass(), // keep same structure
         ]);
     }
 }
