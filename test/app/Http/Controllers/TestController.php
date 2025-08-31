@@ -10,7 +10,7 @@ class TestController extends Controller
     public function __invoke(Request $request)
     {
         return response()->json([
-            'data' => [
+            'data from return endpoint' => [
                 'body' => $request->all(),          // all body params
                 'query' => $request->query(),        // URL parameters
                 'headers' => $request->headers->all(), // request headers
