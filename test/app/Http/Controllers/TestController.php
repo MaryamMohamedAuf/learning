@@ -13,19 +13,14 @@ class TestController extends Controller
         Log::info('🔥 Incoming request received');
 
         return response()->json([
-            'meta' => [
-                'code' => 200,
-                'errors' => [],
-            ],
-            'data1' => $request->all(),
-            'data' => [
+
+            'data from return endpoint ' => [
                 'body' => $request->all(),          // all body params
                 'query' => $request->query(),        // URL parameters
                 'headers' => $request->headers->all(), // request headers
                 'bearer_token' => $request->bearerToken(),  // Authorization Bearer
                 'files' => $request->allFiles(),     // uploaded files
             ],
-            'pagination' => new \stdClass(), // keep same structure
         ]);
     }
 }
