@@ -6,4 +6,3 @@ use App\Http\Controllers\OrderSummaryController;
 use Illuminate\Support\Facades\Route;
 
 Route::POST('/return', TestController::class);
-
