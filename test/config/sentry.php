@@ -38,6 +38,61 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#send_default_pii
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
+    // Drop noisy, repeated issues after a threshold in a rolling TTL window.
+    // Controlled via env:
+    // - SENTRY_THROTTLE_ENABLED=true
+    // - SENTRY_THROTTLE_REPEAT_THRESHOLD=2
+    // - SENTRY_THROTTLE_TTL_SEC=300
+    'before_send' => static function (\Sentry\Event $event, ?\Sentry\EventHint $hint): ?\Sentry\Event {
+        if (! env('SENTRY_THROTTLE_ENABLED', false)) {
+            return $event;
+        }
+
+        try {
+            $ttl_seconds = (int) env('SENTRY_THROTTLE_TTL_SEC', 300);
+            $repeat_threshold = (int) env('SENTRY_THROTTLE_REPEAT_THRESHOLD', 50);
+
+            // Build a stable signature per "issue". Prefer the actual exception if available.
+            $signature_parts = [];
+
+            if ($hint !== null && property_exists($hint, 'exception') && $hint->exception instanceof \Throwable) {
+                /** @var \Throwable $ex */
+                $ex = $hint->exception;
+                $signature_parts[] = get_class($ex);
+                $signature_parts[] = (string) $ex->getCode();
+                $signature_parts[] = (string) $ex->getMessage();
+                $signature_parts[] = basename((string) $ex->getFile()) . ':' . (string) $ex->getLine();
+                $trace = $ex->getTraceAsString();
+                $signature_parts[] = substr($trace, 0, 2000);
+            } else {
+                // Fall back to message + logger + culprit route if present
+                $signature_parts[] = (string) ($event->getMessage() ?? '');
+                $signature_parts[] = (string) ($event->getLogger() ?? '');
+                $request = request();
+                if ($request) {
+                    $signature_parts[] = $request->method() . ' ' . $request->path();
+                }
+            }
+
+            $issue_hash = hash('sha256', implode('|', $signature_parts));
+            $cache_key = 'sentry:throttle:' . $issue_hash;
+
+            // Ensure the key exists with TTL, then increment atomically
+            cache()->add($cache_key, 0, $ttl_seconds);
+            $current_count = cache()->increment($cache_key);
+
+            if ($current_count > $repeat_threshold) {
+                // Returning null drops the event
+                return null;
+            }
+
+            return $event;
+        } catch (\Throwable $t) {
+            // Fail-open: don't block reporting if throttling logic errors
+            return $event;
+        }
+    },
+
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_exceptions
     // 'ignore_exceptions' => [],
 
