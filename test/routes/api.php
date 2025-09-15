@@ -6,3 +6,5 @@ use App\Http\Controllers\OrderSummaryController;
 use Illuminate\Support\Facades\Route;
 
 Route::POST('/return', TestController::class);
+Route::get('/sentry-test',
+    fn() => throw new Exception('Sentry test'));
