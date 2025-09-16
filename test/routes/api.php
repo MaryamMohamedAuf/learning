@@ -12,6 +12,6 @@ Route::get('/sentry-test2',
 
 Route::get('/sentry-test3',
     fn() =>
-    throw new \InvalidArgumentException("not found2", 422));
-   // \Sentry\captureMessage('Payment gateway is slow'));
+   // throw new \InvalidArgumentException("not found2", 422));
+    \Sentry\captureMessage('Payment gateway is slow'));
 

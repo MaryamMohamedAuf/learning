@@ -41,8 +41,8 @@ return [
     // Drop noisy, repeated issues after a threshold in a rolling TTL window.
     // Controlled via env:
     // - SENTRY_THROTTLE_ENABLED=true
-    // - SENTRY_THROTTLE_REPEAT_THRESHOLD=2
-    // - SENTRY_THROTTLE_TTL_SEC=300
+    // - SENTRY_THROTTLE_REPEAT_THRESHOLD=value
+    // - SENTRY_THROTTLE_TTL_SEC=value
     'before_send' => static function (\Sentry\Event $event, ?\Sentry\EventHint $hint): ?\Sentry\Event {
         if (! env('SENTRY_THROTTLE_ENABLED', false)) {
             return $event;
@@ -56,19 +56,16 @@ return [
             $signature_parts = [];
 
             if ($hint !== null && property_exists($hint, 'exception') && $hint->exception instanceof \Throwable) {
+
                 /** @var \Throwable $ex */
                 $ex = $hint->exception;
                 $signature_parts[] = get_class($ex);
                 $signature_parts[] = (string) $ex->getCode();
                 $signature_parts[] = (string) $ex->getMessage();
                 $signature_parts[] = basename((string) $ex->getFile()) . ':' . (string) $ex->getLine();
-              // $trace = $ex->getTraceAsString();
-//                $signature_parts[] = substr($trace, 0, 2000);
-               // $trace = $ex->getTrace();
-               // $signature_parts[] = $trace;
 
             } else {
-                // Fall back to message + logger + culprit route if present
+                // Fall back to message, logger if present
                 $signature_parts[] = (string) ($event->getMessage() ?? '');
                 $signature_parts[] = (string) ($event->getLogger() ?? '');
                 $request = request();
@@ -76,13 +73,11 @@ return [
                     $signature_parts[] = $request->method() . ' ' . $request->path();
                 }
             }
- //dd($signature_parts);
             $issue_hash = hash('sha256', implode('|', $signature_parts));
             $cache_key = 'sentry:throttle:' . $issue_hash;
             // Ensure the key exists with TTL, then increment atomically
             cache()->add($cache_key, 0, $ttl_seconds);
             $current_count = cache()->increment($cache_key);
-           // abort(500);
 
             // If the key did not exist and was created by INCR, ensure TTL is set.
             if ($current_count === 1) {
@@ -92,8 +87,6 @@ return [
                     // Fail-open on expiry set
                 }
             }
-            throw new \Exception("Force fail-open");
-
             if ($current_count > $repeat_threshold) {
                 // Returning null drops the event
                 return null;
