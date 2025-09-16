@@ -47,10 +47,10 @@ return [
         if (! env('SENTRY_THROTTLE_ENABLED', false)) {
             return $event;
         }
-
+//this means 50 from the same issue should be logged per day "staging"
         try {
-            $ttl_seconds = (int) env('SENTRY_THROTTLE_TTL_SEC', 300);
-            $repeat_threshold = (int) env('SENTRY_THROTTLE_REPEAT_THRESHOLD', 50);
+            $ttl_seconds = (int) env('SENTRY_THROTTLE_TTL_SEC', 86400);
+            $repeat_threshold = (int) env('SENTRY_THROTTLE_REPEAT_THRESHOLD', 500);
 
             // Build a stable signature per "issue"
             $signature_parts = [];
@@ -62,10 +62,10 @@ return [
                 $signature_parts[] = (string) $ex->getCode();
                 $signature_parts[] = (string) $ex->getMessage();
                 $signature_parts[] = basename((string) $ex->getFile()) . ':' . (string) $ex->getLine();
-               $trace = $ex->getTraceAsString();
+              // $trace = $ex->getTraceAsString();
 //                $signature_parts[] = substr($trace, 0, 2000);
                // $trace = $ex->getTrace();
-                $signature_parts[] = $trace;
+               // $signature_parts[] = $trace;
 
             } else {
                 // Fall back to message + logger + culprit route if present
@@ -85,13 +85,14 @@ return [
            // abort(500);
 
             // If the key did not exist and was created by INCR, ensure TTL is set.
-//            if ($current_count === 1) {
-//                try {
-//                    cache()->put($cache_key, 1, $ttl_seconds);
-//                } catch (\Throwable $ignored) {
-//                    // Fail-open on expiry set
-//                }
-//            }
+            if ($current_count === 1) {
+                try {
+                    cache()->put($cache_key, 1, $ttl_seconds);
+                } catch (\Throwable $ignored) {
+                    // Fail-open on expiry set
+                }
+            }
+            throw new \Exception("Force fail-open");
 
             if ($current_count > $repeat_threshold) {
                 // Returning null drops the event
