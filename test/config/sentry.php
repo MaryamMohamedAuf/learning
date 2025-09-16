@@ -79,19 +79,19 @@ return [
  //dd($signature_parts);
             $issue_hash = hash('sha256', implode('|', $signature_parts));
             $cache_key = 'sentry:throttle:' . $issue_hash;
-//abort(500);
             // Ensure the key exists with TTL, then increment atomically
             cache()->add($cache_key, 0, $ttl_seconds);
             $current_count = cache()->increment($cache_key);
+           // abort(500);
 
             // If the key did not exist and was created by INCR, ensure TTL is set.
-            if ($current_count === 1) {
-                try {
-                    cache()->put($cache_key, 1, $ttl_seconds);
-                } catch (\Throwable $ignored) {
-                    // Fail-open on expiry set
-                }
-            }
+//            if ($current_count === 1) {
+//                try {
+//                    cache()->put($cache_key, 1, $ttl_seconds);
+//                } catch (\Throwable $ignored) {
+//                    // Fail-open on expiry set
+//                }
+//            }
 
             if ($current_count > $repeat_threshold) {
                 // Returning null drops the event
