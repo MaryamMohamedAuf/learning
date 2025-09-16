@@ -8,3 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::POST('/return', TestController::class);
 Route::get('/sentry-test',
     fn() => throw new Exception('Sentry test'));
+
+Route::get('/sentry-test2',
+    fn() => throw new Exception('Sentry test2',500));

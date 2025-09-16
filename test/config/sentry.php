@@ -52,7 +52,7 @@ return [
             $ttl_seconds = (int) env('SENTRY_THROTTLE_TTL_SEC', 300);
             $repeat_threshold = (int) env('SENTRY_THROTTLE_REPEAT_THRESHOLD', 50);
 
-            // Build a stable signature per "issue". Prefer the actual exception if available.
+            // Build a stable signature per "issue"
             $signature_parts = [];
 
             if ($hint !== null && property_exists($hint, 'exception') && $hint->exception instanceof \Throwable) {
@@ -62,8 +62,11 @@ return [
                 $signature_parts[] = (string) $ex->getCode();
                 $signature_parts[] = (string) $ex->getMessage();
                 $signature_parts[] = basename((string) $ex->getFile()) . ':' . (string) $ex->getLine();
-                $trace = $ex->getTraceAsString();
-                $signature_parts[] = substr($trace, 0, 2000);
+               $trace = $ex->getTraceAsString();
+//                $signature_parts[] = substr($trace, 0, 2000);
+               // $trace = $ex->getTrace();
+                $signature_parts[] = $trace;
+
             } else {
                 // Fall back to message + logger + culprit route if present
                 $signature_parts[] = (string) ($event->getMessage() ?? '');
@@ -73,7 +76,7 @@ return [
                     $signature_parts[] = $request->method() . ' ' . $request->path();
                 }
             }
-
+ dd($signature_parts);
             $issue_hash = hash('sha256', implode('|', $signature_parts));
             $cache_key = 'sentry:throttle:' . $issue_hash;
 
